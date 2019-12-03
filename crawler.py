@@ -9,8 +9,8 @@ import re
 def join_url(link):
     return urljoin(target_url, link)
 
-target_url = 'http://192.168.1.10/mutillidae/'
-#target_url = 'https://pharmacieagroparc.com/'
+#target_url = 'http://192.168.1.10/mutillidae/'
+target_url = 'https://pharmacieagroparc.com/'
 target_links = []
 target_mails = []
 def crawl(url):
@@ -20,9 +20,11 @@ def crawl(url):
     #retrieve all the links, from the href tag
     try:
         links = re.findall('(?:href=")(.*?)"',response.content.decode('cp1252'))
-        mails = re.findall('[\w_.\-]*@\w*.\w*',response.content.decode('cp1252'))
+        #mails = re.findall(' *[\w_.\-]*@\w*.\w*',response.content.decode('cp1252'))
+        mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',response.content.decode('cp1252'))
         for mail in mails:
             if mail not in target_mails:
+                print(mail, url)
                 target_mails.append(mail)
 
         #regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
