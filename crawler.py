@@ -4,7 +4,8 @@ from bs4 import BeautifulSoup as bs
 from urllib.parse import urljoin
 import time
 import re
-
+import shutil
+import os
 
 class Crawler():
     def __init__(self, target_url, verbose=0):
@@ -13,6 +14,7 @@ class Crawler():
         self.target_links = []
         self.target_mails = []
         self.verbose = verbose
+        self.downloaded_files = []
 
     def join_url(self, link):
         return urljoin(target_url, link)
@@ -55,17 +57,47 @@ class Crawler():
                     if self.target_url in link and link not in self.target_links:
 
                         #for now, forget about the files
-                        if '.ico' in link or '.pdf' in link or '.jpg' in link:
+                        #if '.ico' in link or '.jpg' in link or '.pdf' in link:
+                        if '.jpg' in link or '.pdf' in link:
                             if link not in self.target_files:
                                 self.target_files.append(link)
+                                self.download_image(link)
+                       # elif '.pdf' in link:
+                       #     if link not in self.downloaded_files:
+                       #         print(link)
 
-                        #add link to the list
-                        self.target_links.append(link)
+                        else:
+                            #add link to the list
+                            self.target_links.append(link)
 
-                        #Crawl the new link
-                        self.crawl(link)
+                            #Crawl the new link
+                            self.crawl(link)
         except:
             pass
+
+    def download_file(self, url):
+        #retrieving file name from url
+        filename = os.path.basename(url)
+        print('Downloading the file %s' %filename)
+
+        #retrieving file source
+        response = requests.get(url, stream=True)
+
+        #creating file on local system
+        local_file = open(filename,'wb')
+
+        #set stream to True to return stream content
+        response.raw.decode_content = True
+
+        #copying file to local system
+        shutil.copyfileobj(response.raw, local_file)
+
+        #closing everything
+        local_file.close()
+        del response
+
+        #add file to list of downloaded files
+        self.downloaded_files.append(url)
 
     def get_summary(self):
         '''print summary of what was found'''
