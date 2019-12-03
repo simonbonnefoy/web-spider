@@ -6,65 +6,105 @@ import time
 import re
 
 
-def join_url(link):
-    return urljoin(target_url, link)
+class Crawler():
+    def __init__(self, target_url, verbose=0):
+        self.target_url = target_url
+        self.target_files = []
+        self.target_links = []
+        self.target_mails = []
+        self.verbose = verbose
 
-#target_url = 'http://192.168.1.10/mutillidae/'
-target_url = 'https://pharmacieagroparc.com/'
-target_links = []
-target_mails = []
-def crawl(url):
-    print('Crawling through %s'%url)
-    response = requests.get(url)
+    def join_url(self, link):
+        return urljoin(target_url, link)
 
-    #retrieve all the links, from the href tag
-    try:
-        links = re.findall('(?:href=")(.*?)"',response.content.decode('cp1252'))
-        #mails = re.findall(' *[\w_.\-]*@\w*.\w*',response.content.decode('cp1252'))
-        mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',response.content.decode('cp1252'))
-        for mail in mails:
-            if mail not in target_mails:
-                print(mail, url)
-                target_mails.append(mail)
+    def run(self):
+        '''method to start crawling the web'''
+        self.crawl(self.target_url)
 
-        #regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
+    def crawl(self, url):
+        '''method in charge of crawling the web'''
+        if self.verbose == 1: print('Crawling through %s' %url)
 
-        #loop over the links found in the page
-        for link in links:
+        #retrieving the web page to check for elements
+        response = requests.get(url)
 
-            #check if the link is not null
-            if link and '#' not in link:
+        #retrieve all the links, from the href tag
+        try:
+            #get all the links according to the href balise
+            links = re.findall('(?:href=")(.*?)"',response.content.decode('cp1252'))
 
-                #make sure the link is absolute
-                link = join_url(link)
-                #print(link)
+            #regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
+            mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',response.content.decode('cp1252'))
 
-                #Check if the link belongs to the domain
-                if target_url in link and link not in target_links:
+            #storing all the new mails found
+            for mail in mails:
+                if mail not in self.target_mails:
+                    print(mail)
+                    self.target_mails.append(mail)
 
-                    #for now, forget about the files
-                    if '.ico' in link or '.pdf' in link:
-                        continue
+            #loop over the links found in the page
+            for link in links:
 
-                    #add link to the list
-                    target_links.append(link)
-              #      print(url)
+                #check if the link is not null
+                if link and '#' not in link:
 
-                    #Crawl the new link
-                    crawl(link)
-    except:
-        pass
+                    #make sure the link is absolute
+                    link = self.join_url(link)
+
+                    ##Check if the link belongs to the domain and not already registered
+                    if self.target_url in link and link not in self.target_links:
+
+                        #for now, forget about the files
+                        if '.ico' in link or '.pdf' in link or '.jpg' in link:
+                            if link not in self.target_files:
+                                self.target_files.append(link)
+
+                        #add link to the list
+                        self.target_links.append(link)
+
+                        #Crawl the new link
+                        self.crawl(link)
+        except:
+            pass
+
+    def get_summary(self):
+        '''print summary of what was found'''
+        self.get_links()
+        self.get_mails()
+        self.get_files()
+
+    def get_links(self):
+        '''print links found'''
+        print('\n********************************* \n')
+        print('Links found \n')
+        for link in self.target_links:
+            print(link)
+
+    def get_mails(self):
+        '''print mails found'''
+        print('\n********************************* \n')
+        print('Mails found \n')
+        for mail in self.target_mails :
+            print(mail)
+
+    def get_files(self):
+        '''print files found'''
+        print('\n********************************* \n')
+        print('Files found \n')
+        for file in self.target_files :
+            print(file)
 
 
 
 if __name__ == '__main__':
-    crawl(target_url)
-    print('Links found \n')
-    for link in target_links:
-        print(link)
-    print('Mails found \n')
-    for mail in target_mails :
-        print(mail)
+    target_url = 'http://192.168.1.10/mutillidae/'
+    #target_url = 'https://pharmacieagroparc.com/'
+
+    verbose = 0
+    crawler = Crawler(target_url, verbose)
+    crawler.run()
+    crawler.get_summary()
+
 
 
 
