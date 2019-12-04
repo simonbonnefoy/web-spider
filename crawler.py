@@ -17,6 +17,7 @@ class Crawler():
         self.downloaded_files = []
         self.file_extension = ext
         self.dl_files = dl_files
+        self.social_media = []
         self.use_file_extension = len(self.file_extension)>0
         print('Use file extension', len(self.file_extension),self.use_file_extension)
         print('verbose', self.verbose)
@@ -63,6 +64,10 @@ class Crawler():
                 #if link and '#' not in link:
                 if link:
 
+                    #Check is link is from social media
+                    if self.link_is_social_media(link) and link not in self.social_media_links:
+                        self.social_media_links.append(link)
+
                     #make sure the link is absolute
                     link = self.join_url(link)
 
@@ -95,6 +100,13 @@ class Crawler():
             if ext in url:
                 return True
         return False
+
+    def link_is_social_media(self, link):
+        if 'facebook.com' in link or 'instagram.com' in link or 'twitter.com' in link:
+            if self.verbose > 0 : print('Found social media link: %s' %link)
+            return True
+        return False
+
     def download_file(self, url):
         #retrieving file name from url
         filename = os.path.basename(url)
@@ -119,10 +131,10 @@ class Crawler():
         #add file to list of downloaded files
         self.downloaded_files.append(url)
 
-    def is_file(self, url):
-        for ext in self.file_extension:
-            if ext in url:
-                return True
+   # def is_file(self, url):
+   #     for ext in self.file_extension:
+   #         if ext in url:
+   #             return True
 
     def get_summary(self):
         '''print summary of what was found'''
@@ -135,6 +147,13 @@ class Crawler():
         print('\n********************************* \n')
         print('Links found \n')
         for link in self.target_links:
+            print(link)
+
+    def get_social_media(self):
+        '''print social found'''
+        print('\n********************************* \n')
+        print('Social media found \n')
+        for link in self.social_media:
             print(link)
 
     def get_mails(self):
