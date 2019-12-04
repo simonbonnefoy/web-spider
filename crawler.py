@@ -8,16 +8,21 @@ import shutil
 import os
 
 class Crawler():
-    def __init__(self, target_url, verbose=0):
+    def __init__(self, target_url, verbose=0, dl_files=False, ext=[]):
         self.target_url = target_url
         self.target_files = []
         self.target_links = []
         self.target_mails = []
         self.verbose = verbose
         self.downloaded_files = []
+        self.file_extension = ext
+        self.dl_files = dl_files
+        self.use_file_extension = len(self.file_extension)>0
+        print('Use file extension', len(self.file_extension),self.use_file_extension)
+        print('verbose', self.verbose)
 
     def join_url(self, link):
-        return urljoin(target_url, link)
+        return urljoin(self.target_url, link)
 
     def run(self):
         '''method to start crawling the web'''
@@ -25,15 +30,22 @@ class Crawler():
 
     def crawl(self, url):
         '''method in charge of crawling the web'''
-        if self.verbose == 1: print('Crawling through %s' %url)
+        if self.verbose > 0:
+            print('Crawling through %s' %url)
 
         #retrieving the web page to check for elements
         response = requests.get(url)
+        if self.verbose > 2: print(response.text)
+#        print(response.text)
 
         #retrieve all the links, from the href tag
         try:
             #get all the links according to the href balise
-            links = re.findall('(?:href=")(.*?)"',response.content.decode('cp1252'))
+            #links = re.findall('(?:href="|\')(.*?)\'|"',response.content.decode('cp1252'))
+            #this regexp deals with both simple and double quote around the link
+            links = re.findall('(?:href=["\'])(.*?)["\']',response.content.decode('cp1252'))
+
+            if self.verbose > 1: print(links)
 
             #regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
             mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',response.content.decode('cp1252'))
@@ -48,7 +60,8 @@ class Crawler():
             for link in links:
 
                 #check if the link is not null
-                if link and '#' not in link:
+                #if link and '#' not in link:
+                if link:
 
                     #make sure the link is absolute
                     link = self.join_url(link)
@@ -56,12 +69,13 @@ class Crawler():
                     ##Check if the link belongs to the domain and not already registered
                     if self.target_url in link and link not in self.target_links:
 
-                        #for now, forget about the files
-                        #if '.ico' in link or '.jpg' in link or '.pdf' in link:
-                        if '.jpg' in link or '.pdf' in link:
-                            if link not in self.target_files:
-                                self.target_files.append(link)
-                                self.download_image(link)
+                        #check if file is interesting or listing or download
+                        if self.use_file_extension and self.check_file_extension(link) and link not in self.target_files:
+                            print('Found interesting file')
+                            #if link not in self.target_files:
+                            self.target_files.append(link)
+                            if self.dl_files:
+                                self.download_file(link)
                        # elif '.pdf' in link:
                        #     if link not in self.downloaded_files:
                        #         print(link)
@@ -75,6 +89,12 @@ class Crawler():
         except:
             pass
 
+    def check_file_extension(self, url):
+        '''Check if the file extension is interesting.'''
+        for ext in self.file_extension:
+            if ext in url:
+                return True
+        return False
     def download_file(self, url):
         #retrieving file name from url
         filename = os.path.basename(url)
@@ -98,6 +118,11 @@ class Crawler():
 
         #add file to list of downloaded files
         self.downloaded_files.append(url)
+
+    def is_file(self, url):
+        for ext in self.file_extension:
+            if ext in url:
+                return True
 
     def get_summary(self):
         '''print summary of what was found'''
@@ -129,10 +154,10 @@ class Crawler():
 
 
 if __name__ == '__main__':
-    target_url = 'http://192.168.1.10/mutillidae/'
-    #target_url = 'https://pharmacieagroparc.com/'
+    #target_url = 'http://192.168.1.10/mutillidae/'
+    target_url = 'https://pharmacieagroparc.com/'
 
-    verbose = 0
+    verbose = 1
     crawler = Crawler(target_url, verbose)
     crawler.run()
     crawler.get_summary()

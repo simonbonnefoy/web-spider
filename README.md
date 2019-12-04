@@ -5,5 +5,11 @@ So far the spider also retrieves the email addresses found on the
 target web. Note that the spider cannot retrieve email address that 
 are hidden from robots.
 
-
 pip install beautifulsoup4
+
+
+************************************************************************
+Download images with python
+https://www.dev2qa.com/how-to-download-image-file-from-url-use-python-requests-or-wget-module/
+
+
