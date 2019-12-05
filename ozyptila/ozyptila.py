@@ -39,7 +39,6 @@ if __name__ == '__main__':
         extensions = [str(i) for i in options.file_extension.split(',')]
     else:
         extensions = []
-    print(extensions)
 
     target_url = options.target_url
     #target_url = 'http://192.168.1.10/mutillidae/'

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import requests
 from bs4 import BeautifulSoup as bs
 from urllib.parse import urljoin
@@ -189,19 +188,4 @@ class Crawler():
         print('Files found \n')
         for file in self.target_files :
             print(file)
-
-
-
-if __name__ == '__main__':
-    #target_url = 'http://192.168.1.10/mutillidae/'
-    target_url = 'https://pharmacieagroparc.com/'
-
-    verbose = 1
-    crawler = Crawler(target_url, verbose)
-    crawler.run()
-    crawler.get_summary()
-
-
-
-
 
