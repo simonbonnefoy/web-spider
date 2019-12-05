@@ -44,18 +44,23 @@ class Crawler():
             #get all the links according to the href balise
             #links = re.findall('(?:href="|\')(.*?)\'|"',response.content.decode('cp1252'))
             #this regexp deals with both simple and double quote around the link
-            links = re.findall('(?:href=["\'])(.*?)["\']',response.content.decode('cp1252'))
+            #############################################
+       #     links = re.findall('(?:href=["\'])(.*?)["\']',response.content.decode('cp1252'))
+            #############################################
+
+            #############################################
+            soup = bs(response.text, 'html.parser')
+            links = []
+            for link in soup.findAll(href=True):
+                links.append(link.get('href'))
+            #############################################
+
+
 
             if self.verbose > 1: print(links)
 
-            #regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
-            mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',response.content.decode('cp1252'))
-
-            #storing all the new mails found
-            for mail in mails:
-                if mail not in self.target_mails:
-                    print(mail)
-                    self.target_mails.append(mail)
+            #retrieving mails from the source code if any
+            self.search_mails(response)
 
             #loop over the links found in the page
             for link in links:
@@ -93,6 +98,18 @@ class Crawler():
                             self.crawl(link)
         except:
             pass
+
+    def search_mails(self, html_source):
+        '''method to check for email address in the html source code'''
+        # regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
+        # mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',html_source.content.decode('cp1252'))
+        mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}', html_source.content.decode())
+
+        # storing all the new mails found
+        for mail in mails:
+            if mail not in self.target_mails:
+                print(mail)
+                self.target_mails.append(mail)
 
     def check_file_extension(self, url):
         '''Check if the file extension is interesting.'''
