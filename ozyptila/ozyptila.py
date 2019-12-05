@@ -12,11 +12,13 @@ def get_arguments():
     parser.add_option("-d", "--download", action='store_true',
                       default = False, \
                       dest="download_files", \
-                      help="Download the files found on the server")
+                      help="Download the files found on the server, according"
+                      "to the extension provided."
+                      "Example: -d .jpg,.pdf")
 
     parser.add_option("-x", "--ext", dest="file_extension", \
                       default = '',\
-                      help="Set the files extension you want to search, \n"
+                      help="Set the files extension you want to search \n "
                            "example: -x .jpg,.png,.pdf (default = all)")
 
     (options, arguments) = parser.parse_args()
