@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from crawler import Crawler
+from web_crawler import WebCrawler
+from web_fuzzer import WebFuzzer
 import optparse
 
 def get_arguments():
@@ -40,12 +41,20 @@ if __name__ == '__main__':
     else:
         extensions = []
 
+    #retrieve target url
     target_url = options.target_url
-    #target_url = 'http://192.168.1.10/mutillidae/'
-    #target_url = 'https://pharmacieagroparc.com/'
 
+    #Set option to download files
     dl_files = options.download_files
+
+    #Set Verbose
     verbose = int(options.verbose)
-    crawler = Crawler(target_url, verbose, dl_files, extensions)
+
+    #Create Crawler object
+    crawler = WebCrawler(target_url, verbose, dl_files, extensions)
+
+    #Start crawler
     crawler.run()
+
+    #Retrieve info when crawler is done.
     crawler.get_summary()
