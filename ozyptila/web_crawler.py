@@ -6,6 +6,7 @@ import re
 import shutil
 import os
 import threading
+import faster_than_requests as reqs
 
 class WebCrawler():
     def __init__(self, target_url, verbose=0, dl_files=False, ext=[]):
@@ -40,8 +41,10 @@ class WebCrawler():
             print('Crawling through %s' %url)
 
         #retrieving the web page to check for elements
-        response = requests.get(url)
-        if self.verbose > 2: print(response.text)
+        #response = requests.get(url)
+        response = reqs.get2str(url)
+
+        #if self.verbose > 2: print(response.text)
 #        print(response.text)
 
         #retrieve all the links, from the href tag
@@ -54,7 +57,8 @@ class WebCrawler():
             #############################################
 
             #############################################
-            soup = bs(response.text, 'html.parser')
+            #soup = bs(response.text, 'html.parser')
+            soup = bs(response, 'html.parser')
             links = []
             for link in soup.findAll(href=True):
                 links.append(link.get('href'))
@@ -65,7 +69,7 @@ class WebCrawler():
             if self.verbose > 1: print(links)
 
             #retrieving mails from the source code if any
-            self.search_mails(response)
+            #self.search_mails(response)
 
             #loop over the links found in the page
             for link in links:
