@@ -41,7 +41,6 @@ class WebCrawler():
             print('Crawling through %s' %url)
 
         #retrieving the web page to check for elements
-        #response = requests.get(url)
         response = reqs.get2str(url)
 
         #if self.verbose > 2: print(response.text)
@@ -69,7 +68,7 @@ class WebCrawler():
             if self.verbose > 1: print(links)
 
             #retrieving mails from the source code if any
-            #self.search_mails(response)
+            self.search_mails(response)
 
             #loop over the links found in the page
             for link in links:
@@ -112,7 +111,7 @@ class WebCrawler():
         '''method to check for email address in the html source code'''
         # regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
         # mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',html_source.content.decode('cp1252'))
-        mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}', html_source.content.decode())
+        mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}', html_source)
 
         # storing all the new mails found
         for mail in mails:
