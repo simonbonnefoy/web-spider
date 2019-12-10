@@ -7,6 +7,11 @@ import shutil
 import os
 import threading
 import faster_than_requests as reqs
+import pycurl
+import time
+from io import BytesIO
+import certifi
+
 
 class WebCrawler():
     def __init__(self, target_url, verbose=0, dl_files=False, ext=[]):
@@ -18,7 +23,7 @@ class WebCrawler():
         self.downloaded_files = []
         self.file_extension = ext
         self.dl_files = dl_files
-        self.social_media = []
+        self.social_media_links = []
         self.use_file_extension = len(self.file_extension)>0
         print('Use file extension', len(self.file_extension),self.use_file_extension)
         print('verbose', self.verbose)
@@ -41,7 +46,18 @@ class WebCrawler():
             print('Crawling through %s' %url)
 
         #retrieving the web page to check for elements
-        response = reqs.get2str(url)
+#        response = reqs.get2str(url)
+
+        buffer = BytesIO()
+        c = pycurl.Curl()
+        c.setopt(c.URL, url)
+        c.setopt(c.WRITEDATA, buffer)
+        c.setopt(c.CAINFO, certifi.where())
+        c.perform()
+        c.close()
+
+        response = buffer.getvalue()
+        #print(response)
 
         #if self.verbose > 2: print(response.text)
 #        print(response.text)
@@ -62,8 +78,6 @@ class WebCrawler():
             for link in soup.findAll(href=True):
                 links.append(link.get('href'))
             #############################################
-
-
 
             if self.verbose > 1: print(links)
 
@@ -111,7 +125,7 @@ class WebCrawler():
         '''method to check for email address in the html source code'''
         # regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
         # mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',html_source.content.decode('cp1252'))
-        mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}', html_source)
+        mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}', html_source.decode())
 
         # storing all the new mails found
         for mail in mails:
@@ -166,6 +180,7 @@ class WebCrawler():
         self.get_links()
         self.get_mails()
         self.get_files()
+        self.get_social_media()
 
     def get_links(self):
         '''print links found'''
@@ -178,7 +193,7 @@ class WebCrawler():
         '''print social found'''
         print('\n********************************* \n')
         print('Social media found \n')
-        for link in self.social_media:
+        for link in self.social_media_links:
             print(link)
 
     def get_mails(self):

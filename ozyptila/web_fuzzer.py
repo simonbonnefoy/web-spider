@@ -3,6 +3,11 @@ import queue
 import threading
 from multiprocessing.dummy import Pool
 import copy
+from io import BytesIO
+import certifi
+import sys
+
+import pycurl
 
 class WebFuzzer():
     def __init__(self, target_url_list, wordlist):
@@ -49,10 +54,11 @@ class WebFuzzer():
         #    pool.join()
 
         while not self.target_url_q.empty():
-            for i in range(10):
-                t = threading.Thread(target = self.fuzz(self.target_url_q.get().rstrip()))
-                t.start()
-                t.join()
+            #for i in range(2):
+            #    t = threading.Thread(target = self.fuzz(self.target_url_q.get().rstrip()))
+            #    t.start()
+            #    t.join()
+            self.fuzz(self.target_url_q.get().rstrip())
 
         #    pool.close()
         #    pool.join()
@@ -76,11 +82,23 @@ class WebFuzzer():
             #print(link)
 
             #Getting the link
-            response = requests.get(link)
+            #response = requests.get(link)
+
+            buffer = BytesIO()
+            c = pycurl.Curl()
+            c.setopt(c.URL, link)
+            c.setopt(c.WRITEDATA, buffer)
+            c.setopt(c.CAINFO, certifi.where())
+            c.perform()
+
+            response = buffer.getvalue()
 
             #retrieving code response
-            if response.status_code != 404:
-                print(link, response.status_code)
+            #if response.status_code != 404:
+            #print(link)
+            if c.getinfo(c.RESPONSE_CODE) != 404:
+                print(link, c.RESPONSE_CODE, sys.getsizeof(response))
+               # print(link, response.status_code)
 
                 # add link to list of links found
                 if link not in self.target_files:
@@ -88,6 +106,8 @@ class WebFuzzer():
 
                     #Add link the url queue to be fuzzed in some further rounds
                     self.target_url_q.put(link)
+        c.close()
+        print('byebye')
 
     def add_known_links(self, known_links):
         '''This method gives all the link already know from
