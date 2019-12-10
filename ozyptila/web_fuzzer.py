@@ -71,6 +71,9 @@ class WebFuzzer():
 
         #Looping over all the file names in the dictionnary
         #until queue is empty
+        buffer = BytesIO()
+        c = pycurl.Curl()
+
         while not file_list_q.empty():
             file = file_list_q.get().rstrip()
 
@@ -84,8 +87,6 @@ class WebFuzzer():
             #Getting the link
             #response = requests.get(link)
 
-            buffer = BytesIO()
-            c = pycurl.Curl()
             c.setopt(c.URL, link)
             c.setopt(c.WRITEDATA, buffer)
             c.setopt(c.CAINFO, certifi.where())
@@ -107,7 +108,6 @@ class WebFuzzer():
                     #Add link the url queue to be fuzzed in some further rounds
                     self.target_url_q.put(link)
         c.close()
-        print('byebye')
 
     def add_known_links(self, known_links):
         '''This method gives all the link already know from
