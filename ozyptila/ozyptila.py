@@ -7,15 +7,10 @@ def get_arguments():
     parser = optparse.OptionParser()
     parser.add_option("-u", "--url", dest="target_url", \
             help="URL you want to start crawling from")
+
     parser.add_option("-v", "--verbose", dest="verbose", \
                       default = 0, \
             help="set the verbosity level (0,1,2,3)")
-#    parser.add_option("-d", "--download", action='store_true',
-#                      default = False, \
-#                      dest="download_files", \
-#                      help="Download the files found on the server, according"
-#                      "to the extension provided."
-#                      "Example: -d .jpg,.pdf")
 
     parser.add_option("-d", "--download", dest="download_extension", \
                       default = '',\
