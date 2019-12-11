@@ -1,4 +1,3 @@
-import requests
 import queue
 import threading
 from multiprocessing.dummy import Pool
@@ -6,15 +5,15 @@ import copy
 from io import BytesIO
 import certifi
 import sys
-
 import pycurl
 
 class WebFuzzer():
-    def __init__(self, target_url_list, wordlist):
+    def __init__(self, target_url_list, wordlist, verbose = 0):
         self.target_url_q = self.set_target_url_q(target_url_list)
         self.wordlist = wordlist
         self.wordlist_q = self.build_wordlist(wordlist)
         self.target_files = []
+        self.verbose =  verbose
 
     def set_target_url_q(self, url_list):
         '''Set the queue for the urls already know of the target
@@ -69,12 +68,15 @@ class WebFuzzer():
         #since the get method remove items
         file_list_q = self.build_wordlist(self.wordlist)
 
+        #creating pycurl and buffer object
+        #to send http(s) requests
+        buffer = BytesIO()
+        requests = pycurl.Curl()
+
         #Looping over all the file names in the dictionnary
         #until queue is empty
-        buffer = BytesIO()
-        c = pycurl.Curl()
-
         while not file_list_q.empty():
+            #get file name to test from list queue
             file = file_list_q.get().rstrip()
 
             #Check if url is / ended
@@ -82,24 +84,20 @@ class WebFuzzer():
 
             #creating the url to check
             link = url + str(file.decode())
-            #print(link)
+            if self.verbose > 0 : print(link)
 
-            #Getting the link
-            #response = requests.get(link)
+            #set and sent get requests to link
+            requests.setopt(requests.URL, link)
+            requests.setopt(requests.WRITEDATA, buffer)
+            requests.setopt(requests.CAINFO, certifi.where())
+            requests.perform()
 
-            c.setopt(c.URL, link)
-            c.setopt(c.WRITEDATA, buffer)
-            c.setopt(c.CAINFO, certifi.where())
-            c.perform()
-
+            #retrieve the body of the requets
             response = buffer.getvalue()
 
             #retrieving code response
-            #if response.status_code != 404:
-            #print(link)
-            if c.getinfo(c.RESPONSE_CODE) != 404:
-                print(link, c.RESPONSE_CODE, sys.getsizeof(response))
-               # print(link, response.status_code)
+            if requests.getinfo(requests.RESPONSE_CODE) != 404:
+                print('%s [code:%i, size:%i]' %(link, requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
 
                 # add link to list of links found
                 if link not in self.target_files:
@@ -107,7 +105,9 @@ class WebFuzzer():
 
                     #Add link the url queue to be fuzzed in some further rounds
                     self.target_url_q.put(link)
-        c.close()
+
+        #closing pycurl object
+        requests.close()
 
     def add_known_links(self, known_links):
         '''This method gives all the link already know from

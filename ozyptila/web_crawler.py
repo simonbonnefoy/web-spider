@@ -1,32 +1,25 @@
-import requests
 from bs4 import BeautifulSoup as bs
 from urllib.parse import urljoin
-import time
 import re
 import shutil
 import os
 import threading
-import faster_than_requests as reqs
 import pycurl
 import time
 from io import BytesIO
 import certifi
-
+import definitions
 
 class WebCrawler():
-    def __init__(self, target_url, verbose=0, dl_files=False, ext=[]):
+    def __init__(self, target_url, download_extensions, verbose = 0):
         self._target_url = target_url
         self.target_files = []
         self.target_links = []
         self.target_mails = []
         self.verbose = verbose
-        self.downloaded_files = []
-        self.file_extension = ext
-        self.dl_files = dl_files
+        self.downloaded_extensions = download_extensions
+        self.downloaded_files_list = []
         self.social_media_links = []
-        self.use_file_extension = len(self.file_extension)>0
-        print('Use file extension', len(self.file_extension),self.use_file_extension)
-        print('verbose', self.verbose)
 
     def join_url(self, link):
         return urljoin(self._target_url, link)
@@ -46,38 +39,37 @@ class WebCrawler():
             print('Crawling through %s' %url)
 
         #retrieving the web page to check for elements
-#        response = reqs.get2str(url)
-
         buffer = BytesIO()
-        c = pycurl.Curl()
-        c.setopt(c.URL, url)
-        c.setopt(c.WRITEDATA, buffer)
-        c.setopt(c.CAINFO, certifi.where())
-        c.perform()
-        c.close()
+        requests = pycurl.Curl()
+        requests.setopt(requests.URL, url)
 
+        #Buffer where data will be writter
+        requests.setopt(requests.WRITEDATA, buffer)
+
+        #Follow if forward
+        requests.setopt(requests.FOLLOWLOCATION, 1)
+
+        #Add certificate if https
+        if 'https' in url:
+            requests.setopt(requests.CAINFO, certifi.where())
+        #launch requests
+        requests.perform()
+
+        #cloase object
+        requests.close()
+
+        #store response in buffer object
         response = buffer.getvalue()
-        #print(response)
 
-        #if self.verbose > 2: print(response.text)
-#        print(response.text)
+        if self.verbose > 2: print(response)
 
         #retrieve all the links, from the href tag
         try:
-            #get all the links according to the href balise
-            #links = re.findall('(?:href="|\')(.*?)\'|"',response.content.decode('cp1252'))
-            #this regexp deals with both simple and double quote around the link
-            #############################################
-       #     links = re.findall('(?:href=["\'])(.*?)["\']',response.content.decode('cp1252'))
-            #############################################
-
-            #############################################
-            #soup = bs(response.text, 'html.parser')
+            #get all the links according to the href balises
             soup = bs(response, 'html.parser')
             links = []
             for link in soup.findAll(href=True):
                 links.append(link.get('href'))
-            #############################################
 
             if self.verbose > 1: print(links)
 
@@ -88,12 +80,10 @@ class WebCrawler():
             for link in links:
 
                 #check if the link is not null
-                #if link and '#' not in link:
-                if link:
+                if link and '#' not in link:
 
-                    #Check is link is from social media
-                    if self.link_is_social_media(link) and link not in self.social_media_links:
-                        self.social_media_links.append(link)
+                    #Check is link is from social media and append to list
+                    self.search_social_media_link(link)
 
                     #make sure the link is absolute
                     link = self.join_url(link)
@@ -102,15 +92,11 @@ class WebCrawler():
                     if self._target_url in link and link not in self.target_links:
 
                         #check if file is interesting or listing or download
-                        if self.use_file_extension and self.check_file_extension(link) and link not in self.target_files:
-                            print('Found interesting file')
-                            #if link not in self.target_files:
+                        if self.contains_file(link) and link not in self.target_files:
+                            if self.verbose > 1 : print('Found file %s' %link)
                             self.target_files.append(link)
-                            if self.dl_files:
+                            if len(self.downloaded_extensions) > 0 and link not in self.downloaded_files_list:
                                 self.download_file(link)
-                       # elif '.pdf' in link:
-                       #     if link not in self.downloaded_files:
-                       #         print(link)
 
                         else:
                             #add link to the list
@@ -130,50 +116,66 @@ class WebCrawler():
         # storing all the new mails found
         for mail in mails:
             if mail not in self.target_mails:
-                print(mail)
+                print('Found email %s' %mail)
                 self.target_mails.append(mail)
 
-    def check_file_extension(self, url):
+    def contains_file(self, url):
         '''Check if the file extension is interesting.'''
-        for ext in self.file_extension:
+        for ext in definitions.file_extension:
             if ext in url:
                 return True
         return False
 
-    def link_is_social_media(self, link):
-        if 'facebook.com' in link or 'instagram.com' in link or 'twitter.com' in link:
-            if self.verbose > 0 : print('Found social media link: %s' %link)
-            return True
-        return False
+    def search_social_media_link(self, link):
+            for social in definitions.social_media :
+                if social in link and link not in self.social_media_links:
+                    print('Found social media link %s' % link)
+                    self.social_media_links.append(link)
 
     def download_file(self, url):
         #retrieving file name from url
-        filename = os.path.basename(url)
-        print('Downloading the file %s' %filename)
+        for ext in self.downloaded_extensions:
+            if ext in url:
+                #format the output directory, adding / removing dots
+                ext_path = os.getcwd() + '/' + ext[1:]
+                if os.path.exists(ext_path):
+                    pass
+                else:
+                    os.makedirs(ext_path)
 
-        #retrieving file source
-        response = requests.get(url, stream=True)
+                #retrieving file name to download
+                filename_to_dl = os.path.basename(url)
 
-        #creating file on local system
-        local_file = open(filename,'wb')
+                #making file name on local server to download
 
-        #set stream to True to return stream content
-        response.raw.decode_content = True
+                file_local =ext_path+'/'+filename_to_dl
+                print('Downloading %s to  %s' %(filename_to_dl,file_local))
 
-        #copying file to local system
-        shutil.copyfileobj(response.raw, local_file)
+                #opening file descriptor to write file
+                file_descriptor = open(file_local, "wb")
 
-        #closing everything
-        local_file.close()
-        del response
+                #retrieving file source with pycurl
+                requests = pycurl.Curl()
+                requests.setopt(requests.URL, url)
+                requests.setopt(requests.WRITEDATA, file_descriptor)
 
-        #add file to list of downloaded files
-        self.downloaded_files.append(url)
+                #Follow if forward
+                requests.setopt(requests.FOLLOWLOCATION, 1)
 
-   # def is_file(self, url):
-   #     for ext in self.file_extension:
-   #         if ext in url:
-   #             return True
+                #Add certificate if https
+                if 'https' in url:
+                    requests.setopt(requests.CAINFO, certifi.where())
+
+                #launch requests
+                requests.perform()
+                #close objects
+                requests.close()
+                file_descriptor.close()
+
+                #add downloaded file to the list
+                self.downloaded_files_list.append(url)
+
+
 
     def get_summary(self):
         '''print summary of what was found'''
