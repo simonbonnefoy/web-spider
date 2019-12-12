@@ -6,12 +6,13 @@ from io import BytesIO
 import certifi
 import sys
 import pycurl
+import utilities
 
 class WebFuzzer():
     def __init__(self, target_url_list, wordlist, verbose = 0):
         self.target_url_q = self.set_target_url_q(target_url_list)
         self.wordlist = wordlist
-        self.wordlist_q = self.build_wordlist(wordlist)
+        self.wordlist_q = utilities.build_wordlist(wordlist)
         self.target_files = []
         self.verbose =  verbose
 
@@ -66,7 +67,7 @@ class WebFuzzer():
         '''method that fuzzes the target web site'''
         #We need to recreate the queue everty time
         #since the get method remove items
-        file_list_q = self.build_wordlist(self.wordlist)
+        file_list_q = utilities.build_wordlist(self.wordlist)
 
         #creating pycurl and buffer object
         #to send http(s) requests
@@ -110,8 +111,8 @@ class WebFuzzer():
         requests.close()
 
     def add_known_links(self, known_links):
-        '''This method gives all the link already know from
-        previous search'''
+        '''This method adds all the link already know from
+        previous search to the queue'''
 
         #Check if object is a list or not, and convert it to good format
         if isinstance(known_links,str):
@@ -126,19 +127,3 @@ class WebFuzzer():
         #print(list(self.target_url_q.queue))
 
 
-    def build_wordlist(self, wordlist_file):
-        '''Method to set the dictionnary used to fuzz
-        directories in a Queue object for multi-threading'''
-
-        print("Building the word list")
-        # read in the word list
-        fd = open(wordlist_file,"rb")
-        raw_words = fd.readlines()
-        fd.close()
-        #found_resume = False
-        words= queue.Queue()
-
-        for word in raw_words:
-            word = word.rstrip()
-            words.put(word)
-        return words
