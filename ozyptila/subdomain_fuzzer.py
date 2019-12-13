@@ -64,9 +64,18 @@ class SubDomainFuzzer():
             sub_domain_url = self.target_url.replace('https://', 'https://%s.' % sub_domain)
             return sub_domain_url
 
-        if self.target_url.startswith('http://'):
-            sub_domain_url = self.target_url.replace('http://', 'https://%s.' % sub_domain)
+        if self.target_url.startswith('http://www.'):
+            sub_domain_url = self.target_url.replace('http://www.', 'http://%s.' % sub_domain)
             return sub_domain_url
+
+        if self.target_url.startswith('http://'):
+            sub_domain_url = self.target_url.replace('http://', 'http://%s.' % sub_domain)
+            return sub_domain_url
+
+        if self.target_url.startswith('https://www.'):
+            sub_domain_url = self.target_url.replace('https://www.', 'https://%s.' % sub_domain)
+            return sub_domain_url
+
 
     def get_summary(self):
         print('*******************************************')
