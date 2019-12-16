@@ -2,7 +2,6 @@
 from web_crawler import WebCrawler
 from web_fuzzer import WebFuzzer
 from subdomain_fuzzer import SubDomainFuzzer
-# import optparse
 import argparse
 import os
 
@@ -17,12 +16,23 @@ def get_arguments():
                         help="Crawl the web site from the url. ")
 
     parser.add_argument("-f", "--fuzz", dest="is_fuzz_folders",
-                        help="Fuzz the folders with the given wordlist    \n\n "
-                             "example: -f wordlist.txt")
+                        default=False,
+                        action='store_true',
+                        help="Fuzz the folders of the target url")
+
+    parser.add_argument("-fd", "--folder-wordlist", dest="folders_wordlist",
+                        help="Wordlist used to fuzz the folders    \n\n "
+                             "example: -fd wordlist.txt")
 
     parser.add_argument("-s", "--subdomains", dest="is_fuzz_subdomains",
+                        default=False,
+                        action='store_true',
                         help="Fuzz subdomains with the given wordlist.       \n "
                              "example: -s wordlist.txt")
+
+    parser.add_argument("-sd", "--subdomain-wordlist", dest="subdomains_wordlist",
+                        help="Wordlist used to fuzz the folders    \n\n "
+                             "example: -fd wordlist.txt")
     parser.add_argument("-v", "--verbose", dest="verbose",
                         default=0,
                         help="set the verbosity level (0,1,2,3)")
@@ -39,6 +49,7 @@ def get_arguments():
 if __name__ == '__main__':
     # retrieving arguments
     arguments = get_arguments()
+
     # Converting the ext string into a list of string
     if arguments.download_extension:
         download_extensions = [str(i) for i in arguments.download_extension.split(',')]
@@ -47,13 +58,26 @@ if __name__ == '__main__':
 
     # retrieve target url
     target_url = arguments.target_url
+    # check if crawling is requested
     is_crawl = arguments.is_crawl
-    folders_wordlist = arguments.is_fuzz_folders
-    subdomains_wordlist = arguments.is_fuzz_subdomains
+
+    # check if folder fuzzer is requested
+    is_fuzz_folders = arguments.is_fuzz_folders
+    folders_wordlist = arguments.folders_wordlist
+
+    # check if subdomain fuzzer is requested
+    is_fuzz_sudbomains = arguments.is_fuzz_subdomains
+    subdomains_wordlist = arguments.subdomains_wordlist
 
     # Set Verbose
     verbose = int(arguments.verbose)
 
+    # Creating list to store links and subdomains found
+    links_found = []
+    folders_found = []
+    subdomains_found = []
+
+    # Start the crawler if requested
     if is_crawl:
         # Create Crawler object
         crawler = WebCrawler(target_url, download_extensions, verbose)
@@ -62,37 +86,54 @@ if __name__ == '__main__':
         crawler.run()
 
         # Retrieve info when crawler is done.
-        crawler.get_summary()
+        #crawler.get_summary()
 
-        # list to store good links from crawler
-        target_link_crawl = []
+        # Retrieve the links from the crawler
+        links_found = crawler.target_links
 
-        # retrieving the good link from the crawler
-        for link in crawler.target_links:
-            # if the link is a file, i.e., last part contains a dot
-            # we just take the dirname
-            print(link)
-            if link == target_url:
-                pass
-            else:
-                if '.' not in os.path.basename(link) and '?' not in os.path.basename(link):
-                    link = target_link_crawl.append(link)
+    # Start the folders fuzzer if requested
+    if is_fuzz_folders:
+
+        # Create list to store folder from crawler to be used in folder fuzzer
+        target_folder_crawl = []
+
+        # retrieving the good link from the crawler to parse them to the
+        # folder fuzzer
+        if is_crawl:
+            for link in links_found:
+
+                # Check the links from the crawler to use them in the fuzzer
+                if link == target_url:
+                    pass
                 else:
-                    link = os.path.dirname(link)
-            print(link)
-            # if link not present in the final list, we add it
-            if link not in target_link_crawl:
-                target_link_crawl.append(link)
+                    # if the link is a file, i.e., last part contains a dot
+                    # we just take the dirname
+                    if '.' not in os.path.basename(link) and '?' not in os.path.basename(link):
+                        link = link
+                    else:
+                        link = os.path.dirname(link)
 
-    if folders_wordlist:
+                # if link not present in the final list, we add it
+                if link not in target_folder_crawl:
+                    if verbose > 0:
+                        print('Add link to the web fuzzer: %s' %link)
+                    target_folder_crawl.append(link)
+
         folders_fuzzer = WebFuzzer(target_url, folders_wordlist, verbose)
         try:
             if target_link_crawl:
-                folders_fuzzer.add_known_links(target_link_crawl)
+                folders_fuzzer.add_known_links(target_folder_crawl)
                 folders_fuzzer.run()
-        except:
+        except NameError:
             folders_fuzzer.run()
 
-    if subdomains_wordlist:
-        sub_domain_fuzz = Sub = SubDomainFuzzer(target_url, subdomains_wordlist, verbose)
-        sub_domain_fuzz.run()
+        # Retrieve the folders from fuzz
+        folders_found = folders_fuzzer.target_files
+
+    # Start the subdomains fuzzer if requested
+    if is_fuzz_sudbomains:
+        subdomain_fuzz = Sub = SubDomainFuzzer(target_url, subdomains_wordlist, verbose)
+        subdomain_fuzz.run()
+
+        # Retrieve the subdomain from fuzz
+        subdomains_found = sub_domain_fuzz.target_sub_domains

@@ -1,6 +1,11 @@
 import queue
 
 
+# For printing style
+CURSOR_UP_ONE = '\033[K'
+ERASE_LINE = '\x1b[2K'
+
+
 def build_wordlist(wordlist_file):
     '''Method to set the dictionnary used to fuzz
     directories in a Queue object for multi-threading'''

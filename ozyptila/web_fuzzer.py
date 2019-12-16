@@ -35,17 +35,21 @@ class WebFuzzer():
         #    pool.join()
 
         while not self.target_url_q.empty():
-            # for i in range(2):
-            #    t = threading.Thread(target = self.fuzz(self.target_url_q.get().rstrip()))
-            #    t.start()
-            #    t.join()
-            self.fuzz(self.target_url_q.get().rstrip())
+           # for i in range(4):
+           #     t = threading.Thread(target=self.fuzz())
+           #     t.start()
+           #     t.join()
+            # self.fuzz(self.target_url_q.get().rstrip())
+             self.fuzz()
 
         #    pool.close()
         #    pool.join()
 
-    def fuzz(self, url):
+    # def fuzz(self, url):
+    def fuzz(self):
         """method that fuzzes the target web site"""
+        url = self.target_url_q.get().rstrip()
+        print('Fuzzing on %s' % url)
         # We need to recreate the queue everty time
         # since the get method remove items
         file_list_q = utilities.build_wordlist(self.wordlist)

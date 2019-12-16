@@ -9,8 +9,9 @@ import time
 from io import BytesIO
 import certifi
 import definitions
+import utilities
 
-class WebCrawler():
+class WebCrawler:
     def __init__(self, target_url, download_extensions, verbose = 0):
         self._target_url = target_url
         self.target_files = []
@@ -29,8 +30,36 @@ class WebCrawler():
 
     def run(self):
         '''method to start crawling the web'''
+       # if self.verbose == 0:
+       #     crawler_thread = threading.Thread(target=self.crawl, args = (self._target_url,))
+       #     print_thread = threading.Thread(target=self.print_running, args=(crawler_thread,))
+       #     crawler_thread.start()
+       #     crawler_thread.join()
+       #     print_thread.start()
+
+       #     print_thread.join()
+
+#        else:
         self.crawl(self._target_url)
 
+    def print_running(self, thread):
+        banner = ['|', '/', '-', "\\"]
+        i = 0
+       # while self.crawler_thread.isAlive():
+        while True:
+                print('Crawler is running %s' %banner[i%4], sep = '', end = '\r', flush=True)
+                print(thread.isAlive())
+                #print('Crawler is running %s' %banner[i%4])
+                time.sleep(0.1)
+                i += 1
+
+#    def print_running2(self):
+#        banner = ['|', '/', '-', "\\"]
+#        i = 0
+#        while i < 50:
+#            print('Crawler is crawling %s' %banner[i%4], sep = '', end = '\r', flush=True)
+#            time.sleep(0.1)
+#            i += 1
 
     def crawl(self, url):
         '''method in charge of crawling the web'''
@@ -38,6 +67,9 @@ class WebCrawler():
         if self.verbose > 0:
             print('Crawling through %s' %url)
 
+        # The \x1b[2K\r is used to clean the line until the end, So we can print shorter string
+        # and get rid of all the previous line
+        print('%sCrawling through %s' % (utilities.ERASE_LINE,url), end='\r', flush=True)
         #retrieving the web page to check for elements
         buffer = BytesIO()
         requests = pycurl.Curl()
@@ -93,7 +125,9 @@ class WebCrawler():
 
                         #check if file is interesting or listing or download
                         if self.contains_file(link) and link not in self.target_files:
-                            if self.verbose > 1 : print('Found file %s' %link)
+                            #if self.verbose > 1 : print('\033[KFound file %s' %link)
+                            #print('\033[KFound file %s' %link)
+                            print('%sFound file %s' %(utilities.CURSOR_UP_ONE,link))
                             self.target_files.append(link)
                             if len(self.downloaded_extensions) > 0 and link not in self.downloaded_files_list:
                                 self.download_file(link)
@@ -116,7 +150,8 @@ class WebCrawler():
         # storing all the new mails found
         for mail in mails:
             if mail not in self.target_mails:
-                print('Found email %s' %mail)
+                #print('\033[K\nFound email %s \n' %mail)
+                print('%s\nFound email %s \n' % (utilities.CURSOR_UP_ONE, mail))
                 self.target_mails.append(mail)
 
     def contains_file(self, url):
@@ -129,7 +164,7 @@ class WebCrawler():
     def search_social_media_link(self, link):
             for social in definitions.social_media :
                 if social in link and link not in self.social_media_links:
-                    print('Found social media link %s' % link)
+                    print('%s\nFound social media link %s\n' % (utilities.CURSOR_UP_ONE,link))
                     self.social_media_links.append(link)
 
     def download_file(self, url):
