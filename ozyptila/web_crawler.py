@@ -124,11 +124,15 @@ class WebCrawler:
                     if self._target_url in link and link not in self.target_links:
 
                         #check if file is interesting or listing or download
-                        if self.contains_file(link) and link not in self.target_files:
-                            #if self.verbose > 1 : print('\033[KFound file %s' %link)
-                            #print('\033[KFound file %s' %link)
-                            print('%sFound file %s' %(utilities.CURSOR_UP_ONE,link))
-                            self.target_files.append(link)
+                        if self.contains_file(link): #and link not in self.target_files:
+
+                            # Print file found on the previous line in the output
+                            print('%sFound file %s\n' %(utilities.CURSOR_UP_ONE,link))
+
+                            #Add file to file list if not already done
+                            if link not in self.target_files:
+                                self.target_files.append(link)
+
                             if len(self.downloaded_extensions) > 0 and link not in self.downloaded_files_list:
                                 self.download_file(link)
 

@@ -49,7 +49,8 @@ class WebFuzzer():
     def fuzz(self):
         """method that fuzzes the target web site"""
         url = self.target_url_q.get().rstrip()
-        print('Fuzzing on %s' % url)
+        #print('Fuzzing on %s' % url)
+        #print('%sFuzzing on %s' %(utilities.ERASE_LINE,url))
         # We need to recreate the queue everty time
         # since the get method remove items
         file_list_q = utilities.build_wordlist(self.wordlist)
@@ -71,6 +72,7 @@ class WebFuzzer():
             # creating the url to check
             link = url + str(file.decode())
             if self.verbose > 0: print(link)
+            print('%sFuzzing on %s' %(utilities.ERASE_LINE,link), end='\r', flush=True)
 
             # set and sent get requests to link
             requests.setopt(requests.URL, link)
@@ -84,7 +86,7 @@ class WebFuzzer():
             # retrieving code response
             if requests.getinfo(requests.RESPONSE_CODE) != 404:
                 print(
-                    '%s [code:%i, size:%i]' % (link, requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
+                    '%s%s [code:%i, size:%i]' % (utilities.CURSOR_UP_ONE,link, requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
 
                 # add link to list of links found
                 if link not in self.target_files:
