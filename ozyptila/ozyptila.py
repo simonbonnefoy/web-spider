@@ -4,6 +4,7 @@ from web_fuzzer import WebFuzzer
 from subdomain_fuzzer import SubDomainFuzzer
 import argparse
 import os
+import definitions
 
 
 def get_arguments():

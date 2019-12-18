@@ -5,4 +5,4 @@ file_extension = ['.jpg', '.png', '.pdf', '.zip', '.tar', '.xd', '.gz', '.7z', '
 social_media = ['facebook.com', 'twitter.com', 'instagram.com','github.com', 'gitlab.com']
 
 # extension of file that can represent a web page
-web_page_extensions = ['.html', '.php']
+web_page_extensions = ['','.html', '.php']

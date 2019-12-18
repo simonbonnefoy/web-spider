@@ -7,6 +7,7 @@ import certifi
 import sys
 import pycurl
 import utilities
+import definitions
 
 
 class WebFuzzer():
@@ -72,28 +73,33 @@ class WebFuzzer():
             # creating the url to check
             link = url + str(file.decode())
             if self.verbose > 0: print(link)
-            print('%sFuzzing on %s' %(utilities.ERASE_LINE,link), end='\r', flush=True)
+            #print('%sFuzzing on %s' %(utilities.ERASE_LINE,link), end='\r', flush=True)
 
             # set and sent get requests to link
-            requests.setopt(requests.URL, link)
             requests.setopt(requests.WRITEDATA, buffer)
             requests.setopt(requests.CAINFO, certifi.where())
-            requests.perform()
 
-            # retrieve the body of the requets
-            response = buffer.getvalue()
+            #loop over the extensions defined in definitions.py
+            for ext in definitions.web_page_extensions:
+                link_with_extension = link + ext
+                print('%sFuzzing on %s' % (utilities.ERASE_LINE, link_with_extension), end='\r', flush=True)
+                requests.setopt(requests.URL, link_with_extension)
+                requests.perform()
 
-            # retrieving code response
-            if requests.getinfo(requests.RESPONSE_CODE) != 404:
-                print(
-                    '%s%s [code:%i, size:%i]' % (utilities.CURSOR_UP_ONE,link, requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
+                # retrieve the body of the requets
+                response = buffer.getvalue()
 
-                # add link to list of links found
-                if link not in self.target_files:
-                    self.target_files.append(link)
+                # retrieving code response
+                if requests.getinfo(requests.RESPONSE_CODE) != 404:
+                    print( '%s%s [code:%i, size:%i]' % (utilities.CURSOR_UP_ONE,link_with_extension,
+                                                     requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
 
-                    # Add link the url queue to be fuzzed in some further rounds
-                    self.target_url_q.put(link)
+                    # add link to list of links found
+                    if link not in self.target_files:
+                        self.target_files.append(link)
+
+                        # Add link the url queue to be fuzzed in some further rounds
+                        self.target_url_q.put(link)
 
         # closing pycurl object
         requests.close()

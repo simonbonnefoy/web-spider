@@ -4,6 +4,8 @@ import sys
 import pycurl
 import queue
 import utilities
+import threading
+import time
 
 class SubDomainFuzzer():
     def __init__(self, target_url, wordlist, verbose=0):
@@ -14,8 +16,18 @@ class SubDomainFuzzer():
 
     def run(self):
         #run the subdomain fuzzer
-        self.fuzz_subdomain(self.target_url)
+        thread_list = []
+        for n_threads in range(8):
+           thread = threading.Thread(target=self.fuzz_subdomain, args=(self.target_url,))
+           thread.start()
+        for thread in thread_list:
+            thread.join()
 
+
+    def print_num(self,i):
+        for k in range(10):
+            print('*'*i)
+            time.sleep(i)
     def fuzz_subdomain(self, url):
 
         #creating pycurl object and buffer to store results
@@ -34,7 +46,8 @@ class SubDomainFuzzer():
             requests.setopt(requests.WRITEDATA, buffer)
             requests.setopt(requests.CAINFO, certifi.where())
 
-            if self.verbose > 0 : print(sub_domain_url)
+            #if self.verbose > 0 : print(sub_domain_url)
+            print('%sFuzzing on %s' % (utilities.ERASE_LINE, sub_domain_url), end='\r', flush=True)
 
             #if the subdomain cannot be resolved, pycurl throws an error
             try:
@@ -45,7 +58,9 @@ class SubDomainFuzzer():
 
                 #retrieving code response
                 if requests.getinfo(requests.RESPONSE_CODE) != 404:
-                    print('%s [code:%i, size:%i]' %(sub_domain_url, requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
+                    print( '%s%s [code:%i, size:%i]' % (utilities.CURSOR_UP_ONE,sub_domain_url,
+                                                        requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
+                    #print('%s [code:%i, size:%i]' %(sub_domain_url, requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
 
                     # add link to list of links found
                     if sub_domain_url not in self.target_sub_domains:
