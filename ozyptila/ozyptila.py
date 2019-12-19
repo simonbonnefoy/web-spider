@@ -131,9 +131,9 @@ if __name__ == '__main__':
         try:
             if target_link_crawl:
                 folders_fuzzer.add_known_links(target_folder_crawl)
-                folders_fuzzer.run()
+                folders_fuzzer.run(n_threads)
         except NameError:
-            folders_fuzzer.run()
+            folders_fuzzer.run(n_threads)
 
         # Retrieve the folders from fuzz
         folders_found = folders_fuzzer.target_files

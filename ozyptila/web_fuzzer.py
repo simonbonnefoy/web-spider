@@ -8,53 +8,44 @@ import sys
 import pycurl
 import utilities
 import definitions
-
+from thread_fuzz import ThreadFuzz
+import time
 
 class WebFuzzer():
     def __init__(self, target_url_list, wordlist, verbose=0):
         self.target_url_q = utilities.build_url_q(target_url_list)
-        self.wordlist = wordlist
-        self.wordlist_q = utilities.build_wordlist(wordlist)
+        self.wordlist = utilities.build_wordlist(wordlist)
+        self.wordlist_queue = utilities.build_wordlist_queue(wordlist)
+        self.wordlist_file = wordlist
         self.target_files = []
         self.verbose = verbose
+        self.thread = []
 
-    def run(self):
+    def run(self, n_threads=1):
         """Method to run the web fuzzer on the website
         Implementation of multi threading to be checked"""
-        # for i in range (2):
-        #    t = threading.Thread(target=self.fuzz(self.target_url))
-        #    t.start()
-        #    t.join()
-        # Until queue is not empty, keep loopin on urls
-        # while not self.target_url_q.empty():
-        # self.fuzz(self.target_url_q.get().rstrip())
-
-        # while not self.target_url_q.empty():
-        #    pool = Pool(2)
-        #    asyncresponse = pool.map(self.fuzz(self.target_url_q.get().rstrip()))
-        #    pool.close()
-        #    pool.join()
 
         while not self.target_url_q.empty():
-           # for i in range(4):
-           #     t = threading.Thread(target=self.fuzz())
-           #     t.start()
-           #     t.join()
+           self.wordlist_queue = utilities.build_wordlist_queue(self.wordlist_file)
+           url = self.target_url_q.get().rstrip()
+           for i in range(n_threads):
+               t = threading.Thread(target=self.fuzz, args=(url,))
+               t.start()
+               self.thread.append(t)
+
+           for thread in self.thread:
+               thread.join()
             # self.fuzz(self.target_url_q.get().rstrip())
-             self.fuzz()
+            # self.fuzz()
 
         #    pool.close()
         #    pool.join()
 
     # def fuzz(self, url):
-    def fuzz(self):
+    def fuzz(self, url):
         """method that fuzzes the target web site"""
-        url = self.target_url_q.get().rstrip()
-        #print('Fuzzing on %s' % url)
-        #print('%sFuzzing on %s' %(utilities.ERASE_LINE,url))
-        # We need to recreate the queue everty time
-        # since the get method remove items
-        file_list_q = utilities.build_wordlist(self.wordlist)
+#        url = self.target_url_q.get().rstrip()
+
 
         # creating pycurl and buffer object
         # to send http(s) requests
@@ -63,9 +54,11 @@ class WebFuzzer():
 
         # Looping over all the file names in the dictionnary
         # until queue is empty
-        while not file_list_q.empty():
+        #for file in self.wordlist:
+        while not self.wordlist_queue.empty():
+
             # get file name to test from list queue
-            file = file_list_q.get().rstrip()
+            file = self.wordlist_queue.get().rstrip()
 
             # Check if url is / ended
             if url[-1] != '/': url += '/'
@@ -73,7 +66,6 @@ class WebFuzzer():
             # creating the url to check
             link = url + str(file.decode())
             if self.verbose > 0: print(link)
-            #print('%sFuzzing on %s' %(utilities.ERASE_LINE,link), end='\r', flush=True)
 
             # set and sent get requests to link
             requests.setopt(requests.WRITEDATA, buffer)

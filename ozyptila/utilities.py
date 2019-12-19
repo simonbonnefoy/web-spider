@@ -6,7 +6,7 @@ CURSOR_UP_ONE = '\033[K'
 ERASE_LINE = '\x1b[2K'
 
 
-def build_wordlist(wordlist_file):
+def build_wordlist_queue(wordlist_file):
     '''Method to set the dictionnary used to fuzz
     directories in a Queue object for multi-threading'''
 
@@ -23,6 +23,21 @@ def build_wordlist(wordlist_file):
         words.put(word)
     return words
 
+def build_wordlist(wordlist_file):
+    '''Method to set the dictionnary used to fuzz
+    directories in a Queue object for multi-threading'''
+
+    # read in the word list
+    fd = open(wordlist_file, "rb")
+    raw_words = fd.readlines()
+    fd.close()
+
+    words = [word.strip() for word in raw_words]
+    return words
+
+    #for word in raw_words:
+    #    word = word.rstrip()
+    #    words.append(word)
 
 def build_url_q(url_list):
     '''Set the queue for the urls already know of the target

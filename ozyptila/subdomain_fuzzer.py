@@ -11,24 +11,23 @@ class SubDomainFuzzer():
     def __init__(self, target_url, wordlist, verbose=0):
         self.target_url = target_url
         self.target_sub_domains = []
-        self.wordlist_q = utilities.build_wordlist(wordlist)
+        self.wordlist_q = utilities.build_wordlist_queue(wordlist)
         self.verbose =  verbose
 
     def run(self, n_threads=1):
-        #run the subdomain fuzzer
+        """ Method that set and runs the subdomain fuzzer"""
+        # Create a list to store the threads
         thread_list = []
-        #for n_threads in range(8):
+
+        # Create and start the threads
         for n in range (n_threads):
            thread = threading.Thread(target=self.fuzz_subdomain, args=(self.target_url,))
            thread.start()
+
+        # Join all the threads
         for thread in thread_list:
             thread.join()
 
-
-    def print_num(self,i):
-        for k in range(10):
-            print('*'*i)
-            time.sleep(i)
     def fuzz_subdomain(self, url):
 
         #creating pycurl object and buffer to store results
