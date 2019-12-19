@@ -42,6 +42,11 @@ def get_arguments():
                         default='',
                         help="Set the files extension you want to download \n "
                              "example: -x .jpg,.png,.pdf (default = none)")
+
+    parser.add_argument("-j", "--threads", dest="n_threads",
+                        default='1',
+                        help="Number of parallel thread to throw\n")
+
     args = parser.parse_args()
 
     return args
@@ -70,6 +75,8 @@ if __name__ == '__main__':
     is_fuzz_sudbomains = arguments.is_fuzz_subdomains
     subdomains_wordlist = arguments.subdomains_wordlist
 
+    # Get number of threads
+    n_threads = int(arguments.n_threads)
     # Set Verbose
     verbose = int(arguments.verbose)
 
@@ -134,7 +141,7 @@ if __name__ == '__main__':
     # Start the subdomains fuzzer if requested
     if is_fuzz_sudbomains:
         subdomain_fuzz = Sub = SubDomainFuzzer(target_url, subdomains_wordlist, verbose)
-        subdomain_fuzz.run()
+        subdomain_fuzz.run(n_threads)
 
         # Retrieve the subdomain from fuzz
         subdomains_found = subdomain_fuzz.target_sub_domains

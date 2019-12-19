@@ -14,10 +14,11 @@ class SubDomainFuzzer():
         self.wordlist_q = utilities.build_wordlist(wordlist)
         self.verbose =  verbose
 
-    def run(self):
+    def run(self, n_threads=1):
         #run the subdomain fuzzer
         thread_list = []
-        for n_threads in range(8):
+        #for n_threads in range(8):
+        for n in range (n_threads):
            thread = threading.Thread(target=self.fuzz_subdomain, args=(self.target_url,))
            thread.start()
         for thread in thread_list:
