@@ -3,4 +3,4 @@ init:
 
 
 test:
-	test test
+	pytest

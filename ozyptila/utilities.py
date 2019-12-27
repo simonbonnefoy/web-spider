@@ -39,7 +39,7 @@ def build_wordlist(wordlist_file):
     #    word = word.rstrip()
     #    words.append(word)
 
-def build_url_q(url_list):
+def build_url_queue(url_list):
     '''Set the queue for the urls already know of the target
     A string or a list can be given as parameter'''
 

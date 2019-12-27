@@ -8,12 +8,11 @@ import sys
 import pycurl
 import utilities
 import definitions
-from thread_fuzz import ThreadFuzz
 import time
 
 class WebFuzzer():
     def __init__(self, target_url_list, wordlist, verbose=0):
-        self.target_url_q = utilities.build_url_q(target_url_list)
+        self.target_url_q = utilities.build_url_queue(target_url_list)
         self.wordlist = utilities.build_wordlist(wordlist)
         self.wordlist_queue = utilities.build_wordlist_queue(wordlist)
         self.wordlist_file = wordlist

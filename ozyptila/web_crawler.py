@@ -23,13 +23,15 @@ class WebCrawler:
         self.social_media_links = []
 
     def join_url(self, link):
+        """add the the link to the target url to make a url"""
         return urljoin(self._target_url, link)
 
     def set_target_url(self, target_url):
+        """set the target url"""
         self._target_url = target_url
 
     def run(self):
-        '''method to start crawling the web'''
+        """method to start crawling the web"""
        # if self.verbose == 0:
        #     crawler_thread = threading.Thread(target=self.crawl, args = (self._target_url,))
        #     print_thread = threading.Thread(target=self.print_running, args=(crawler_thread,))
@@ -43,9 +45,11 @@ class WebCrawler:
         self.crawl(self._target_url)
 
     def print_running(self, thread):
+        """Test of printing baneer while the crawler is running.
+        This is meant to be used in a different thread.
+        Not sure if this will be used in the future"""
         banner = ['|', '/', '-', "\\"]
         i = 0
-       # while self.crawler_thread.isAlive():
         while True:
                 print('Crawler is running %s' %banner[i%4], sep = '', end = '\r', flush=True)
                 print(thread.isAlive())
@@ -53,16 +57,9 @@ class WebCrawler:
                 time.sleep(0.1)
                 i += 1
 
-#    def print_running2(self):
-#        banner = ['|', '/', '-', "\\"]
-#        i = 0
-#        while i < 50:
-#            print('Crawler is crawling %s' %banner[i%4], sep = '', end = '\r', flush=True)
-#            time.sleep(0.1)
-#            i += 1
 
     def crawl(self, url):
-        '''method in charge of crawling the web'''
+        """method in charge of crawling the web"""
 
         if self.verbose > 0:
             print('Crawling through %s' %url)
@@ -84,10 +81,11 @@ class WebCrawler:
         #Add certificate if https
         if 'https' in url:
             requests.setopt(requests.CAINFO, certifi.where())
+
         #launch requests
         requests.perform()
 
-        #cloase object
+        #close object
         requests.close()
 
         #store response in buffer object
@@ -97,7 +95,7 @@ class WebCrawler:
 
         #retrieve all the links, from the href tag
         try:
-            #get all the links according to the href balises
+            #get all the links according to the href tag
             soup = bs(response, 'html.parser')
             links = []
             for link in soup.findAll(href=True):

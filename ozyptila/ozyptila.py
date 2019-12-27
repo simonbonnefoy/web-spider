@@ -8,7 +8,7 @@ import definitions
 
 
 def get_arguments():
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='Ozyptilla help.')
     parser.add_argument('-u', '--url', dest='target_url',
                         help='Set the target url.')
     parser.add_argument("-c", "--crawl", dest="is_crawl",
@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
     # Start the subdomains fuzzer if requested
     if is_fuzz_sudbomains:
-        subdomain_fuzz = Sub = SubDomainFuzzer(target_url, subdomains_wordlist, verbose)
+        subdomain_fuzz = SubDomainFuzzer(target_url, subdomains_wordlist, verbose)
         subdomain_fuzz.run(n_threads)
 
         # Retrieve the subdomain from fuzz
