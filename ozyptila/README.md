@@ -35,9 +35,9 @@ Then clone the repository and run the Makefile
     $ make
 
 This will install the dependencies required.
-You can then run the different test to check the functionalities
+You can then run the different tests to check the functionalities
 
-    $make check
+    $make test 
 
 You can find out how to use ozyptilla:
 
@@ -48,21 +48,21 @@ You can find out how to use ozyptilla:
 
     optional arguments:
       -h, --help            show this help message and exit
-     -u TARGET_URL, --url TARGET_URL
+      -u TARGET_URL, --url TARGET_URL
                              Set the target url.
-    -c, --crawl           Crawl the web site from the url.
-    -f, --fuzz            Fuzz the folders of the target url
-    -fd FOLDERS_WORDLIST, --folder-wordlist FOLDERS_WORDLIST
+     -c, --crawl           Crawl the web site from the url.
+     -f, --fuzz            Fuzz the folders of the target url
+     -fd FOLDERS_WORDLIST, --folder-wordlist FOLDERS_WORDLIST
                             Wordlist used to fuzz the folders example: -fd wordlist.txt
-    -s, --subdomains      Fuzz subdomains with the given wordlist. example: -s wordlist.txt
-    -sd SUBDOMAINS_WORDLIST, --subdomain-wordlist SUBDOMAINS_WORDLIST
-                         Wordlist used to fuzz the folders example: -fd wordlist.txt
-    -v VERBOSE, --verbose VERBOSE
-                         set the verbosity level (0,1,2,3)
-    -d DOWNLOAD_EXTENSION, --download DOWNLOAD_EXTENSION
-                         Set the files extension you want to download example: -x .jpg,.png,.pdf (default = none)
-    -j N_THREADS, --threads N_THREADS
-                        Number of parallel thread to throw
+     -s, --subdomains      Fuzz subdomains with the given wordlist. example: -s wordlist.txt
+     -sd SUBDOMAINS_WORDLIST, --subdomain-wordlist SUBDOMAINS_WORDLIST
+                          Wordlist used to fuzz the folders example: -fd wordlist.txt
+     -v VERBOSE, --verbose VERBOSE
+                          set the verbosity level (0,1,2,3)
+     -d DOWNLOAD_EXTENSION, --download DOWNLOAD_EXTENSION
+                          Set the files extension you want to download example: -x .jpg,.png,.pdf (default = none)
+     -j N_THREADS, --threads N_THREADS
+                         Number of parallel thread to throw
 
 
 
