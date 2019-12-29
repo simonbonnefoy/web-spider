@@ -43,6 +43,7 @@ class SubDomainFuzzer():
 
             #Setting the pycurl object
             requests.setopt(requests.URL, sub_domain_url)
+
             requests.setopt(requests.WRITEDATA, buffer)
             requests.setopt(requests.CAINFO, certifi.where())
 

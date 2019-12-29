@@ -10,9 +10,12 @@ from io import BytesIO
 import certifi
 import definitions
 import utilities
+from logger import crawler_logger
+import logger
+import logging
 
 class WebCrawler:
-    def __init__(self, target_url, download_extensions, verbose = 0):
+    def __init__(self, target_url, download_extensions, verbose = 0, log_file = 'web_crawler.log'):
         self._target_url = target_url
         self.target_files = []
         self.target_links = []
@@ -21,6 +24,8 @@ class WebCrawler:
         self.downloaded_extensions = download_extensions
         self.downloaded_files_list = []
         self.social_media_links = []
+        self.log_file = log_file
+        crawler_logger.setLevel(logger.level[self.verbose])
 
     def join_url(self, link):
         """add the the link to the target url to make a url"""
@@ -126,6 +131,7 @@ class WebCrawler:
 
                             # Print file found on the previous line in the output
                             print('%sFound file %s\n' %(utilities.CURSOR_UP_ONE,link))
+                            self.log.info('Found file %s',link)
 
                             #Add file to file list if not already done
                             if link not in self.target_files:
@@ -137,6 +143,8 @@ class WebCrawler:
                         else:
                             #add link to the list
                             self.target_links.append(link)
+                            #log.info('Found link %s'%link)
+                            crawler_logger.info('Found link %s'%link)
 
                             #Crawl the new link
                             self.crawl(link)
@@ -147,7 +155,7 @@ class WebCrawler:
         '''method to check for email address in the html source code'''
         # regexp to search for mail. Match alphanum -_. chars @ alphanum.alphanum
         # mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}',html_source.content.decode('cp1252'))
-        mails = re.findall('[\w_.\-]{3,}@\w*.\w{2,}', html_source.decode())
+        mails = re.findall('[\w_.\-]{3,}@\w*\.\w{2,}', html_source.decode())
 
         # storing all the new mails found
         for mail in mails:

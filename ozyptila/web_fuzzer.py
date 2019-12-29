@@ -48,7 +48,7 @@ class WebFuzzer():
 
         # creating pycurl and buffer object
         # to send http(s) requests
-        buffer = BytesIO()
+        #buffer = BytesIO()
         requests = pycurl.Curl()
 
         # Looping over all the file names in the dictionnary
@@ -67,7 +67,7 @@ class WebFuzzer():
             if self.verbose > 0: print(link)
 
             # set and sent get requests to link
-            requests.setopt(requests.WRITEDATA, buffer)
+           # requests.setopt(requests.WRITEDATA, buffer)
             requests.setopt(requests.CAINFO, certifi.where())
 
             #loop over the extensions defined in definitions.py
@@ -75,6 +75,8 @@ class WebFuzzer():
                 link_with_extension = link + ext
                 print('%sFuzzing on %s' % (utilities.ERASE_LINE, link_with_extension), end='\r', flush=True)
                 requests.setopt(requests.URL, link_with_extension)
+                buffer = BytesIO()
+                requests.setopt(requests.WRITEDATA, buffer)
                 requests.perform()
 
                 # retrieve the body of the requets
