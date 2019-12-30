@@ -10,9 +10,11 @@ from io import BytesIO
 import certifi
 import definitions
 import utilities
-from logger import crawler_logger
 import logger
-import logging
+#from logger import crawler_logger
+
+global crawler_logger
+crawler_logger = logger.crawler_logger
 
 class WebCrawler:
     def __init__(self, target_url, download_extensions, verbose = 0, log_file = 'web_crawler.log'):
@@ -66,12 +68,12 @@ class WebCrawler:
     def crawl(self, url):
         """method in charge of crawling the web"""
 
-        if self.verbose > 0:
-            print('Crawling through %s' %url)
+        crawler_logger.debug('Crawling through %s' %url)
 
-        # The \x1b[2K\r is used to clean the line until the end, So we can print shorter string
-        # and get rid of all the previous line
+        # Setting a progress output
         print('%sCrawling through %s' % (utilities.ERASE_LINE,url), end='\r', flush=True)
+        #print('Crawling through %s' %url, end='\r', flush=True)
+
         #retrieving the web page to check for elements
         buffer = BytesIO()
         requests = pycurl.Curl()
@@ -96,7 +98,8 @@ class WebCrawler:
         #store response in buffer object
         response = buffer.getvalue()
 
-        if self.verbose > 2: print(response)
+        #crawler_logger.debug(response)
+        #if self.verbose > 2: print(response)
 
         #retrieve all the links, from the href tag
         try:
@@ -106,7 +109,9 @@ class WebCrawler:
             for link in soup.findAll(href=True):
                 links.append(link.get('href'))
 
-            if self.verbose > 1: print(links)
+            # Print links found depending on verbosity
+            crawler_logger.debug('Links found on page %s : ' %url)
+            crawler_logger.debug(links)
 
             #retrieving mails from the source code if any
             self.search_mails(response)
@@ -130,8 +135,8 @@ class WebCrawler:
                         if self.contains_file(link): #and link not in self.target_files:
 
                             # Print file found on the previous line in the output
-                            print('%sFound file %s\n' %(utilities.CURSOR_UP_ONE,link))
-                            self.log.info('Found file %s',link)
+                            #print('%sFound file %s\n' %(utilities.CURSOR_UP_ONE,link))
+                            crawler_logger.info('Found file %s' %link)
 
                             #Add file to file list if not already done
                             if link not in self.target_files:
@@ -144,7 +149,7 @@ class WebCrawler:
                             #add link to the list
                             self.target_links.append(link)
                             #log.info('Found link %s'%link)
-                            crawler_logger.info('Found link %s'%link)
+                            crawler_logger.debug('Found link %s' %link)
 
                             #Crawl the new link
                             self.crawl(link)
@@ -161,7 +166,11 @@ class WebCrawler:
         for mail in mails:
             if mail not in self.target_mails:
                 #print('\033[K\nFound email %s \n' %mail)
-                print('%s\nFound email %s \n' % (utilities.CURSOR_UP_ONE, mail))
+                #print('%s\nFound email %s \n' % (utilities.CURSOR_UP_ONE, mail))
+                print('%s'%utilities.ERASE_LINE)
+                crawler_logger.info('Found email %s' %mail)
+                #print('%sCrawling through %s' % (utilities.ERASE_LINE, url), end='\r', flush=True)
+                #print('\nFound email %s \n' %mail)
                 self.target_mails.append(mail)
 
     def contains_file(self, url):
@@ -175,6 +184,7 @@ class WebCrawler:
             for social in definitions.social_media :
                 if social in link and link not in self.social_media_links:
                     print('%s\nFound social media link %s\n' % (utilities.CURSOR_UP_ONE,link))
+                    rawler_logger.info('\nFound social media link %s\n' %link)
                     self.social_media_links.append(link)
 
     def download_file(self, url):
@@ -224,6 +234,11 @@ class WebCrawler:
 
     def get_summary(self):
         '''print summary of what was found'''
+
+        crawler_logger.info('%s\n'%utilities.ERASE_LINE)
+        crawler_logger.info('%s============================'%utilities.ERASE_LINE)
+        crawler_logger.info('%s Summary of the crawler'%utilities.ERASE_LINE)
+        crawler_logger.info('%s============================'%utilities.ERASE_LINE)
         self.get_links()
         self.get_mails()
         self.get_files()
@@ -231,29 +246,26 @@ class WebCrawler:
 
     def get_links(self):
         '''print links found'''
-        print('\n********************************* \n')
-        print('Links found \n')
+        crawler_logger.info('%s\n*********************************'
+                            '************************************** \n'%utilities.ERASE_LINE)
         for link in self.target_links:
-            print(link)
+            crawler_logger.info('Link found %s' %link)
 
     def get_social_media(self):
         '''print social found'''
-        print('\n********************************* \n')
-        print('Social media found \n')
+        crawler_logger.info('%s\n********************************* \n'%utilities.ERASE_LINE)
         for link in self.social_media_links:
-            print(link)
+            crawler_logger.info('Social media found %s '%link)
 
     def get_mails(self):
         '''print mails found'''
-        print('\n********************************* \n')
-        print('Mails found \n')
+        crawler_logger.info('%s\n********************************* \n'%utilities.ERASE_LINE)
         for mail in self.target_mails :
-            print(mail)
+            crawler_logger.info('Mail found %s' %mail)
 
     def get_files(self):
         '''print files found'''
-        print('\n********************************* \n')
-        print('Files found \n')
+        crawler_logger.info('%s\n********************************* \n'%utilities.ERASE_LINE)
         for file in self.target_files :
-            print(file)
+            crawler_logger.info('Found file %s' %file)
 

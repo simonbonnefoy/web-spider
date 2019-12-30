@@ -1,18 +1,13 @@
 import logging
 
-#level = {
-#    1: logging.ERROR,
-#    2: logging.WARNING,
-#    3: logging.INFO,
-#    4: logging.DEBUG
-#}
 
 level = {
-    0: logging.INFO,
-    1: logging.DEBUG,
-    2: logging.WARNING,
-    3: logging.INFO,
-    4: logging.DEBUG
+    0: logging.NOTSET,
+    1: logging.INFO,
+    2: logging.DEBUG,
+    3: logging.WARNING,
+    4: logging.ERROR,
+    5: logging.CRITICAL
 }
 
 ###############################################
@@ -25,12 +20,10 @@ datestr = "%m/%d/%Y %I:%M:%S %p "
 #basic logging config
 logging.basicConfig(
     filename="custom_crawler_output.log",
-    #level=levell,
     filemode="w",
     format=fmtstr,
     datefmt=datestr,
 )
-
 # Create handlers
 c_handler = logging.StreamHandler()
 f_handler = logging.FileHandler('file.log')

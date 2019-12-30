@@ -77,6 +77,7 @@ if __name__ == '__main__':
 
     # Get number of threads
     n_threads = int(arguments.n_threads)
+
     # Set Verbose
     verbose = int(arguments.verbose)
 
@@ -94,7 +95,7 @@ if __name__ == '__main__':
         crawler.run()
 
         # Retrieve info when crawler is done.
-        #crawler.get_summary()
+        crawler.get_summary()
 
         # Retrieve the links from the crawler
         links_found = crawler.target_links
