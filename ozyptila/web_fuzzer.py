@@ -9,6 +9,8 @@ import pycurl
 import utilities
 import definitions
 import time
+from logger import web_fuzzer_logger
+import logger
 
 class WebFuzzer():
     def __init__(self, target_url_list, wordlist, verbose=0):
@@ -19,6 +21,7 @@ class WebFuzzer():
         self.target_files = []
         self.verbose = verbose
         self.thread = []
+        web_fuzzer_logger.setLevel(logger.level[self.verbose])
 
     def run(self, n_threads=1):
         """Method to run the web fuzzer on the website
@@ -64,7 +67,8 @@ class WebFuzzer():
 
             # creating the url to check
             link = url + str(file.decode())
-            if self.verbose > 0: print(link)
+            web_fuzzer_logger.debug('testing %s' %link)
+            #if self.verbose > 0: print(link)
 
             # set and sent get requests to link
            # requests.setopt(requests.WRITEDATA, buffer)
@@ -84,8 +88,10 @@ class WebFuzzer():
 
                 # retrieving code response
                 if requests.getinfo(requests.RESPONSE_CODE) != 404:
-                    print( '%s%s [code:%i, size:%i]' % (utilities.CURSOR_UP_ONE,link_with_extension,
-                                                     requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
+                    #print( '%s%s [code:%i, size:%i]' % (utilities.CURSOR_UP_ONE,link_with_extension,
+                    #                                 requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
+                    web_fuzzer_logger.info( '%s%s [code:%i, size:%i]' % (utilities.CURSOR_UP_ONE,link_with_extension,
+                                                        requests.getinfo(requests.RESPONSE_CODE), sys.getsizeof(response)))
 
                     # add link to list of links found
                     if link not in self.target_files:
@@ -109,6 +115,5 @@ class WebFuzzer():
 
         # Fill the queue object with the urls already known
         for url in known_links:
-            print('Adding link to the queue %s' % url)
+            web_fuzzer_logger.info('Adding link to the fuzzer queue %s' % url)
             self.target_url_q.put(url)
-        # print(list(self.target_url_q.queue))

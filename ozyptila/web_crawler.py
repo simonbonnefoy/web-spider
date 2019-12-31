@@ -11,10 +11,7 @@ import certifi
 import definitions
 import utilities
 import logger
-#from logger import crawler_logger
-
-global crawler_logger
-crawler_logger = logger.crawler_logger
+from logger import crawler_logger
 
 class WebCrawler:
     def __init__(self, target_url, download_extensions, verbose = 0, log_file = 'web_crawler.log'):
@@ -51,19 +48,6 @@ class WebCrawler:
 #        else:
         self.crawl(self._target_url)
 
-    def print_running(self, thread):
-        """Test of printing baneer while the crawler is running.
-        This is meant to be used in a different thread.
-        Not sure if this will be used in the future"""
-        banner = ['|', '/', '-', "\\"]
-        i = 0
-        while True:
-                print('Crawler is running %s' %banner[i%4], sep = '', end = '\r', flush=True)
-                print(thread.isAlive())
-                #print('Crawler is running %s' %banner[i%4])
-                time.sleep(0.1)
-                i += 1
-
 
     def crawl(self, url):
         """method in charge of crawling the web"""
@@ -72,14 +56,13 @@ class WebCrawler:
 
         # Setting a progress output
         print('%sCrawling through %s' % (utilities.ERASE_LINE,url), end='\r', flush=True)
-        #print('Crawling through %s' %url, end='\r', flush=True)
 
-        #retrieving the web page to check for elements
+        #Building the objects needed to GET the web page
         buffer = BytesIO()
         requests = pycurl.Curl()
         requests.setopt(requests.URL, url)
 
-        #Buffer where data will be writter
+        #Buffer where data will be written
         requests.setopt(requests.WRITEDATA, buffer)
 
         #Follow if forward
@@ -89,17 +72,14 @@ class WebCrawler:
         if 'https' in url:
             requests.setopt(requests.CAINFO, certifi.where())
 
-        #launch requests
+        # launch requests
         requests.perform()
 
-        #close object
+        # close pycurl object
         requests.close()
 
-        #store response in buffer object
+        # store response in buffer object
         response = buffer.getvalue()
-
-        #crawler_logger.debug(response)
-        #if self.verbose > 2: print(response)
 
         #retrieve all the links, from the href tag
         try:
@@ -110,8 +90,8 @@ class WebCrawler:
                 links.append(link.get('href'))
 
             # Print links found depending on verbosity
-            crawler_logger.debug('Links found on page %s : ' %url)
-            crawler_logger.debug(links)
+#            crawler_logger.debug('Links found on page %s : ' %url)
+#            crawler_logger.debug(links)
 
             #retrieving mails from the source code if any
             self.search_mails(response)
@@ -135,7 +115,6 @@ class WebCrawler:
                         if self.contains_file(link): #and link not in self.target_files:
 
                             # Print file found on the previous line in the output
-                            #print('%sFound file %s\n' %(utilities.CURSOR_UP_ONE,link))
                             crawler_logger.info('Found file %s' %link)
 
                             #Add file to file list if not already done
@@ -148,7 +127,6 @@ class WebCrawler:
                         else:
                             #add link to the list
                             self.target_links.append(link)
-                            #log.info('Found link %s'%link)
                             crawler_logger.debug('Found link %s' %link)
 
                             #Crawl the new link
@@ -169,8 +147,6 @@ class WebCrawler:
                 #print('%s\nFound email %s \n' % (utilities.CURSOR_UP_ONE, mail))
                 print('%s'%utilities.ERASE_LINE)
                 crawler_logger.info('Found email %s' %mail)
-                #print('%sCrawling through %s' % (utilities.ERASE_LINE, url), end='\r', flush=True)
-                #print('\nFound email %s \n' %mail)
                 self.target_mails.append(mail)
 
     def contains_file(self, url):

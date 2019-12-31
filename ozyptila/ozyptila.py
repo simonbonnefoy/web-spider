@@ -130,8 +130,11 @@ if __name__ == '__main__':
 
         folders_fuzzer = WebFuzzer(target_url, folders_wordlist, verbose)
         try:
-            if target_link_crawl:
+            #if target_link_crawl:
+            if len(target_folder_crawl)>0:
                 folders_fuzzer.add_known_links(target_folder_crawl)
+                folders_fuzzer.run(n_threads)
+            else:
                 folders_fuzzer.run(n_threads)
         except NameError:
             folders_fuzzer.run(n_threads)
