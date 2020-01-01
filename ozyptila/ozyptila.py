@@ -148,4 +148,5 @@ if __name__ == '__main__':
         subdomain_fuzz.run(n_threads)
 
         # Retrieve the subdomain from fuzz
-        subdomains_found = subdomain_fuzz.target_sub_domains
+        #subdomains_found = subdomain_fuzz.target_sub_domains
+        #subdomain_fuzz.get_summary()

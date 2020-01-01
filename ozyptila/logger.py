@@ -54,3 +54,18 @@ logging.basicConfig(
 web_fuzzer_logger = logging.getLogger('web_fuzzer')
 web_fuzzer_logger.addHandler(f_handler)
 web_fuzzer_logger.addHandler(c_handler)
+
+###############################################
+# Define logger for subdomain fuzzer
+###############################################
+
+logging.basicConfig(
+    filename="custom_subdomain_fuzzer_output.log",
+    filemode="w",
+    format=fmtstr,
+    datefmt=datestr,
+)
+
+subdomain_fuzzer_logger = logging.getLogger('subdomain_fuzzer')
+subdomain_fuzzer_logger.addHandler(f_handler)
+subdomain_fuzzer_logger.addHandler(c_handler)
