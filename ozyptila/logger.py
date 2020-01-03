@@ -29,8 +29,8 @@ datestr = "%m/%d/%Y %I:%M:%S %p "
 
 #basic logging config
 logging.basicConfig(
-    filename="custom_crawler_output.log",
-    filemode="w",
+    filename="ozyptila.log",
+    filemode="a",
     format=fmtstr,
     datefmt=datestr,
 )
@@ -45,8 +45,8 @@ crawler_logger.addHandler(c_handler)
 ###############################################
 
 logging.basicConfig(
-    filename="custom_web_fuzzer_output.log",
-    filemode="w",
+    filename="ozyptila.log",
+    filemode="a",
     format=fmtstr,
     datefmt=datestr,
 )
@@ -60,8 +60,8 @@ web_fuzzer_logger.addHandler(c_handler)
 ###############################################
 
 logging.basicConfig(
-    filename="custom_subdomain_fuzzer_output.log",
-    filemode="w",
+    filename="ozyptila.log",
+    filemode="a",
     format=fmtstr,
     datefmt=datestr,
 )

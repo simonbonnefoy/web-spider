@@ -53,8 +53,17 @@ def get_arguments():
 
 
 if __name__ == '__main__':
+    # Remove previous log if if exists
+    fd = open('ozyptila.log','w')
+    fd.close()
+#    if os.path.isfile('ozyptila.log'):
+#        print('ozyptila.log already exists... deleting the file')
+#        cmd = 'rm ozyptila.log'
+#        os.system(cmd)
+#
     # retrieving arguments
     arguments = get_arguments()
+
 
     # Converting the ext string into a list of string
     if arguments.download_extension:
