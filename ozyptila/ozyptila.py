@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-from web_crawler import WebCrawler
-from web_fuzzer import WebFuzzer
-from subdomain_fuzzer import SubDomainFuzzer
+from src.web_crawler import WebCrawler
+from src.web_fuzzer import WebFuzzer
+from src.subdomain_fuzzer import SubDomainFuzzer
 import argparse
 import os
-import definitions
+import src.definitions
 
 
 def get_arguments():

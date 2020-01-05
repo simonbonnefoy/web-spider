@@ -6,11 +6,11 @@ from io import BytesIO
 import certifi
 import sys
 import pycurl
-import utilities
-import definitions
+import src.utilities as utilities
+import src.definitions as definitions
 import time
-from logger import web_fuzzer_logger
-import logger
+from src.logger import web_fuzzer_logger
+import src.logger as logger
 
 class WebFuzzer():
     def __init__(self, target_url_list, wordlist, verbose=0):

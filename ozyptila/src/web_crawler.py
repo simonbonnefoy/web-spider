@@ -8,10 +8,10 @@ import pycurl
 import time
 from io import BytesIO
 import certifi
-import definitions
-import utilities
-import logger
-from logger import crawler_logger
+import src.definitions as definitions
+import src.utilities as utilities
+import src.logger as logger
+from src.logger import crawler_logger
 
 class WebCrawler:
     def __init__(self, target_url, download_extensions, verbose = 0, log_file = 'web_crawler.log'):
@@ -230,18 +230,27 @@ class WebCrawler:
     def get_social_media(self):
         '''print social found'''
         crawler_logger.info('%s\n********************************* \n'%utilities.ERASE_LINE)
-        for link in self.social_media_links:
-            crawler_logger.info('Social media found %s '%link)
+        if len(self.social_media_links)==0:
+            crawler_logger.info('No social media link found')
+        else:
+            for link in self.social_media_links:
+                crawler_logger.info('Social media found %s '%link)
 
     def get_mails(self):
         '''print mails found'''
         crawler_logger.info('%s\n********************************* \n'%utilities.ERASE_LINE)
-        for mail in self.target_mails :
-            crawler_logger.info('Mail found %s' %mail)
+        if len(self.target_mails)==0:
+            crawler_logger.info('No mail link found')
+        else:
+            for mail in self.target_mails :
+                crawler_logger.info('Mail found %s' %mail)
 
     def get_files(self):
         '''print files found'''
         crawler_logger.info('%s\n********************************* \n'%utilities.ERASE_LINE)
-        for file in self.target_files :
-            crawler_logger.info('Found file %s' %file)
+        if len(self.target_files)==0:
+            crawler_logger.info('No file found')
+        else:
+            for file in self.target_files :
+                crawler_logger.info('Found file %s' %file)
 

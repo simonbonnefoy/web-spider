@@ -3,11 +3,12 @@ import certifi
 import sys
 import pycurl
 import queue
-import utilities
+import src.utilities as utilities
 import threading
 import time
-from logger import subdomain_fuzzer_logger
-import logger
+from src.logger import subdomain_fuzzer_logger
+import src.logger as logger
+
 
 class SubDomainFuzzer():
     def __init__(self, target_url, wordlist, verbose=0):
