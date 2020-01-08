@@ -3,4 +3,4 @@ init:
 
 
 test:
-	pytest
+	cd unit_test; pytest
